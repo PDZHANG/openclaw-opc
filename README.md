@@ -28,6 +28,18 @@
 
 ---
 
+## 📸 界面预览
+
+![界面预览 1](./docs/img/image1.png)
+![界面预览 2](./docs/img/image2.png)
+![界面预览 3](./docs/img/image3.png)
+![界面预览 4](./docs/img/image4.png)
+![界面预览 5](./docs/img/image5.png)
+![界面预览 6](./docs/img/image6.png)
+![界面预览 7](./docs/img/image7.png)
+
+---
+
 ## 🚀 功能特性
 
 ### 👥 AI 员工管理
