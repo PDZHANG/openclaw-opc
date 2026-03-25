@@ -1,0 +1,8 @@
+FROM docker.m.daocloud.io/steipete/openclaw:latest
+
+# 复制初始化脚本
+COPY init-openclaw.sh /usr/local/bin/init-openclaw.sh
+RUN chmod +x /usr/local/bin/init-openclaw.sh
+
+# 设置入口点
+ENTRYPOINT ["/usr/local/bin/init-openclaw.sh"]

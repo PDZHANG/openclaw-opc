@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: openclaw-opc-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - ../data:/app/data
+      # 如果需要访问 OpenClaw 的工作区文件，挂载你的 OpenClaw 数据目录
+      - ~/.openclaw:/root/.openclaw
+    environment:
+      - PORT=4000
+      - DATABASE_PATH=/app/data/db.sqlite
+      # 配置外部 OpenClaw 连接
+      - OPENCLAW_PATH=/root/.openclaw
+      # macOS/Windows 使用: http://host.docker.internal:36488
+      # Linux 使用: http://172.17.0.1:36488
+      - OPENCLAW_GATEWAY_URL=http://172.17.0.1:36488
+      - OPENCLAW_GATEWAY_TOKEN=2ef4dd405ed80cfdc553f2d2fbcc8218bb84085f113bf93c
+      - CORS_ORIGIN=*
+      # WebSocket RPC 配置 (可选)
+      - OPENCLAW_USE_WEBSOCKET_RPC=false
+      # macOS/Windows 使用: ws://host.docker.internal:36488
+      # Linux 使用: ws://172.17.0.1:36488
+      - OPENCLAW_GATEWAY_WS_URL=ws://172.17.0.1:36488
+      - OPENCLAW_ALLOW_INSECURE_TLS=false
+      - OPENCLAW_DISABLE_DEVICE_PAIRING=true
+      # macOS/Windows 使用: http://host.docker.internal:36488
+      # Linux 使用: http://172.17.0.1:36488
+      - OPENCLAW_GATEWAY_WS_ORIGIN=http://172.17.0.1:36488
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: openclaw-opc-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

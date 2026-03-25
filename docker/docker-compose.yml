@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  openclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile.openclaw
+    container_name: openclaw-gateway
+    restart: unless-stopped
+    ports:
+      - "12667:12667"
+      - "18789:18789"
+    volumes:
+      - openclaw-data:/root/.openclaw
+    environment:
+      - NODE_ENV=production
+      - OPENCLAW_GATEWAY_TOKEN=openclaw-secret-token-2024
+      - OPENCLAW_GATEWAY_PORT=18789
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: openclaw-opc-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - ../data:/app/data
+      - openclaw-data:/root/.openclaw
+    environment:
+      - PORT=4000
+      - DATABASE_PATH=/app/data/db.json
+      - OPENCLAW_PATH=/root/.openclaw
+      - OPENCLAW_GATEWAY_URL=http://openclaw:18789
+      - OPENCLAW_GATEWAY_TOKEN=openclaw-secret-token-2024
+      - CORS_ORIGIN=*
+      # WebSocket RPC 配置 (可选)
+      - OPENCLAW_USE_WEBSOCKET_RPC=true
+      - OPENCLAW_GATEWAY_WS_URL=ws://openclaw:18789
+      - OPENCLAW_ALLOW_INSECURE_TLS=false
+      - OPENCLAW_DISABLE_DEVICE_PAIRING=true
+      - OPENCLAW_GATEWAY_WS_ORIGIN=http://openclaw:18789
+    depends_on:
+      - openclaw
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: openclaw-opc-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  openclaw-data:

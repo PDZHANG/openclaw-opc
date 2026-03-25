@@ -1,0 +1,23 @@
+FROM docker.m.daocloud.io/node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY backend/package*.json ./
+RUN npm ci
+
+COPY backend/ .
+RUN npm run build
+
+FROM docker.m.daocloud.io/node:20-alpine
+
+WORKDIR /app
+
+COPY backend/package*.json ./
+RUN npm ci --only=production
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/migrations ./src/migrations
+
+EXPOSE 4000
+
+CMD ["node", "dist/server.js"]

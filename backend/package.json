@@ -1,0 +1,37 @@
+{
+  "name": "openclaw-opc-backend",
+  "version": "1.0.0",
+  "description": "多智能体AI工程后端服务",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "db:migrate": "tsx src/scripts/runMigrations.ts",
+    "db:status": "tsx src/scripts/checkMigrationStatus.ts"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "jsonwebtoken": "^9.0.3",
+    "socket.io": "^4.7.5",
+    "sql.js": "^1.14.1",
+    "uuid": "^9.0.1",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/archiver": "^7.0.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.11.28",
+    "@types/uuid": "^9.0.8",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.2"
+  }
+}
