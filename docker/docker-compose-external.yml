@@ -21,7 +21,7 @@ services:
       # macOS/Windows 使用: http://host.docker.internal:36488
       # Linux 使用: http://172.17.0.1:36488
       - OPENCLAW_GATEWAY_URL=http://172.17.0.1:36488
-      - OPENCLAW_GATEWAY_TOKEN=2ef4dd405ed80cfdc553f2d2fbcc8218bb84085f113bf93c
+      - OPENCLAW_GATEWAY_TOKEN=secret-token
       - CORS_ORIGIN=*
       # WebSocket RPC 配置 (可选)
       - OPENCLAW_USE_WEBSOCKET_RPC=false
