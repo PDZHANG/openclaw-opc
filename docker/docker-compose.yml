@@ -41,6 +41,7 @@ services:
       - OPENCLAW_ALLOW_INSECURE_TLS=false
       - OPENCLAW_DISABLE_DEVICE_PAIRING=true
       - OPENCLAW_GATEWAY_WS_ORIGIN=http://openclaw:18789
+      - OPENCLAW_USE_RESPONSES_API=false
     depends_on:
       - openclaw
 

@@ -8,12 +8,14 @@ import {
   openclawConnectMetadata,
   sendMessage as gatewaySendMessage,
   OpenClawGatewayError,
+  openClawResponsesService,
 } from './openclaw-gateway';
 
 const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://localhost:18789';
 const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN || '';
 const GATEWAY_WS_URL = process.env.OPENCLAW_GATEWAY_WS_URL || 'ws://localhost:18789';
 const USE_WEBSOCKET_RPC = process.env.OPENCLAW_USE_WEBSOCKET_RPC === 'true';
+const USE_RESPONSES_API = process.env.OPENCLAW_USE_RESPONSES_API === 'true';
 const GATEWAY_WS_ORIGIN = process.env.OPENCLAW_GATEWAY_WS_ORIGIN;
 
 export class OpenClawService {
@@ -316,11 +318,34 @@ export class OpenClawService {
     
     console.log(`[OpenClawService] Final message to send: "${finalMessage.substring(0, 100)}${finalMessage.length > 100 ? '...' : ''}"`);
 
+    if (USE_RESPONSES_API) {
+      console.log('[OpenClawService] Using OpenResponses API');
+      return this.sendMessageViaResponsesApi(agentId, finalMessage, user);
+    }
+
     if (this.useWebSocketRpc) {
       return this.sendMessageViaWebSocket(agentId, finalMessage, user);
     }
 
     return this.sendMessageViaHttp(agentId, finalMessage, user);
+  }
+
+  private async sendMessageViaResponsesApi(agentId: string, message: string, user?: string): Promise<string> {
+    try {
+      console.log('[OpenClawService] Calling OpenResponses API for agent:', agentId);
+      const response = await openClawResponsesService.createResponse(
+        agentId,
+        message,
+        { user, injectKnowledge: false }
+      );
+      
+      const text = openClawResponsesService.extractTextFromResponse(response);
+      console.log('[OpenClawService] OpenResponses API response received');
+      return text;
+    } catch (error) {
+      console.error('Error calling OpenResponses API:', error);
+      return this.getMockResponse(agentId, message);
+    }
   }
 
   private async sendMessageViaHttp(agentId: string, message: string, user?: string): Promise<string> {
@@ -494,11 +519,45 @@ export class OpenClawService {
     
     console.log(`[OpenClawService] Final message to send: "${finalMessage.substring(0, 100)}${finalMessage.length > 100 ? '...' : ''}"`);
 
+    if (USE_RESPONSES_API) {
+      console.log('[OpenClawService] Using OpenResponses API for streaming');
+      return this.sendMessageStreamingViaResponsesApi(agentId, finalMessage, onChunk, user);
+    }
+
     if (this.useWebSocketRpc) {
       return this.sendMessageStreamingViaWebSocket(agentId, finalMessage, onChunk, user, chatHistory);
     }
 
     return this.sendMessageStreamingViaHttp(agentId, finalMessage, onChunk, user, chatHistory);
+  }
+
+  private async sendMessageStreamingViaResponsesApi(
+    agentId: string, 
+    message: string, 
+    onChunk: (chunk: string) => Promise<void>,
+    user?: string
+  ): Promise<void> {
+    try {
+      console.log('[OpenClawService] Calling OpenResponses API streaming for agent:', agentId);
+      
+      await openClawResponsesService.createResponseStreaming(
+        agentId,
+        message,
+        async (item) => {
+          if (item.content) {
+            await onChunk(item.content);
+          }
+        },
+        async (response) => {
+          console.log('[OpenClawService] OpenResponses API streaming complete');
+        },
+        { user, injectKnowledge: false }
+      );
+    } catch (error) {
+      console.error('Error calling OpenResponses API streaming:', error);
+      const mockResponse = this.getMockResponse(agentId, message);
+      await onChunk(mockResponse);
+    }
   }
 
   private async sendMessageStreamingViaHttp(

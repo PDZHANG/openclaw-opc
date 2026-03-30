@@ -33,6 +33,8 @@ services:
       # macOS/Windows 使用: http://host.docker.internal:36488
       # Linux 使用: http://172.17.0.1:36488
       - OPENCLAW_GATEWAY_WS_ORIGIN=http://172.17.0.1:36488
+      # 是否使用 OpenResponses API
+      - OPENCLAW_USE_RESPONSES_API=false
 
   frontend:
     build:
